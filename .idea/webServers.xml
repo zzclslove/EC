@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="bdf7dc5e-941b-4b11-9938-f2d41c3451eb" name="ec" url="http://bxu2340600170.my3w.com">
+        <fileTransfer host="bxu2340600170.my3w.com" port="21" rootFolder="/htdocs" password="df9ddf93df92df9adf9bdf92df93df9a" username="bxu2340600170">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
