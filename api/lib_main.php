@@ -283,7 +283,7 @@ function get_goods_info($goods_id)
     if ($row !== false)
     {
         /* 用户评论级别取整 */
-        $row['comment_rank']  = ceil($row['comment_rank']) == 0 ? 5 : ceil($row['comment_rank']);
+        $row['comment_rank']  = $row['comment_rank'] == 0 ? 5 : $row['comment_rank'];
 
         /* 修正促销价格 */
         if ($row['promote_price'] > 0)

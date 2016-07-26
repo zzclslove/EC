@@ -133,6 +133,7 @@ switch ($action)
                 array_push($comments, $value);
             }
             $goods['comments'] = $comments;
+            $goods['comments_count'] = $count;
 
             /* 商品购买记录 */
             $sql = 'SELECT u.user_name, og.goods_number, oi.add_time, IF(oi.order_status IN (2, 3, 4), 0, 1) AS order_status ' .
