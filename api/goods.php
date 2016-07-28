@@ -142,7 +142,7 @@ switch ($action)
             $bought_notes = $db->getAll($sql);
             foreach ($bought_notes as $key => $val)
             {
-                $bought_notes[$key]['add_time'] = local_date("Y-m-d G:i:s", $val['add_time']);
+                $bought_notes[$key]['add_time'] = local_date("Y-m-d", $val['add_time']);
             }
             $sql = 'SELECT count(*) ' .
                 'FROM ' . $ecs->table('order_info') . ' AS oi LEFT JOIN ' . $ecs->table('users') . ' AS u ON oi.user_id = u.user_id, ' . $ecs->table('order_goods') . ' AS og ' .
