@@ -417,7 +417,7 @@ function get_goods_properties($goods_id)
  */
 function get_goods_gallery($goods_id)
 {
-    $sql = 'SELECT img_url ' .
+    $sql = 'SELECT img_url, img_desc ' .
         ' FROM ' . $GLOBALS['ecs']->table('goods_gallery') .
         " WHERE goods_id = '$goods_id' LIMIT " . $GLOBALS['_CFG']['goods_gallery_number'];
     $row = $GLOBALS['db']->getAll($sql);
@@ -425,7 +425,8 @@ function get_goods_gallery($goods_id)
     $arr = array();
     foreach($row as $key => $gallery_img)
     {
-        array_push($arr, get_image_path($goods_id, $gallery_img['img_url'], false, 'gallery'));
+        $goods_img_path = get_image_path($goods_id, $gallery_img['img_url'], false, 'gallery');
+        array_push($arr, array("url" => $goods_img_path, "title" => $gallery_img['img_desc']));
     }
     return $arr;
 }
