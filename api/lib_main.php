@@ -271,7 +271,7 @@ function get_goods_info($goods_id)
     $time = gmtime();
     $sql = 'SELECT g.cat_id, g.click_count, g.goods_brief as brief, g.goods_desc, g.goods_id as id, ' .
         'g.goods_name as name, g.goods_sales, g.market_price, g.promote_end_date, g.promote_price, ' .
-        'g.promote_start_date, g.shop_price, ' .
+        'g.promote_start_date, g.shop_price, g.goods_thumb as thumb, ' .
         'IFNULL(AVG(r.comment_rank), 0) AS comment_rank ' .
         'FROM ' . $GLOBALS['ecs']->table('goods') . ' AS g ' .
         'LEFT JOIN ' . $GLOBALS['ecs']->table('comment') . ' AS r '.
@@ -283,7 +283,7 @@ function get_goods_info($goods_id)
     if ($row !== false)
     {
         /* 用户评论级别取整 */
-        $row['comment_rank']  = ceil($row['comment_rank']) == 0 ? 5 : ceil($row['comment_rank']);
+        $row['comment_rank']  = $row['comment_rank'] == 0 ? 5 : $row['comment_rank'];
 
         /* 修正促销价格 */
         if ($row['promote_price'] > 0)

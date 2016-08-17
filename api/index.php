@@ -22,7 +22,6 @@ switch ($action)
                 'bestProductList' => array(),
                 'newProductList' => array()
             ),
-            'findingProductList' => array(),
             'categoryList' => array()
         );
 

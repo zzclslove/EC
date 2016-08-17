@@ -133,6 +133,7 @@ switch ($action)
                 array_push($comments, $value);
             }
             $goods['comments'] = $comments;
+            $goods['comments_count'] = $count;
 
             /* 商品购买记录 */
             $sql = 'SELECT u.user_name, og.goods_number, oi.add_time, IF(oi.order_status IN (2, 3, 4), 0, 1) AS order_status ' .
@@ -141,7 +142,7 @@ switch ($action)
             $bought_notes = $db->getAll($sql);
             foreach ($bought_notes as $key => $val)
             {
-                $bought_notes[$key]['add_time'] = local_date("Y-m-d G:i:s", $val['add_time']);
+                $bought_notes[$key]['add_time'] = local_date("Y-m-d", $val['add_time']);
             }
             $sql = 'SELECT count(*) ' .
                 'FROM ' . $ecs->table('order_info') . ' AS oi LEFT JOIN ' . $ecs->table('users') . ' AS u ON oi.user_id = u.user_id, ' . $ecs->table('order_goods') . ' AS og ' .
