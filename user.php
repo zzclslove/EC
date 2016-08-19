@@ -201,7 +201,7 @@ elseif ($action == 'act_register')
             show_message($_LANG['passwd_balnk']);
         }
 
-//互亿无线代码
+        //互亿无线代码
 		$mobile = isset($_POST['extend_field5']) ? trim($_POST['extend_field5']) : '';//手机号
 		$verifycode = isset($_POST['sms_verifycode']) ? trim($_POST['sms_verifycode']) : '';//验证码
 
@@ -241,7 +241,7 @@ elseif ($action == 'act_register')
 				show_message($_LANG['verifycode_mobile_phone_notmatch']);
 			}
 		}
-//互亿无线代码
+        //互亿无线代码
 
         /* 验证码检查 */
         if ((intval($_CFG['captcha']) & CAPTCHA_REGISTER) && gd_version() > 0)
@@ -290,7 +290,7 @@ elseif ($action == 'act_register')
 
 			$sql = "UPDATE " . $ecs->table('verify_code') . " SET reguid=" . $_SESSION['user_id'] . ",regdateline='" . gmtime() ."',status=2 WHERE mobile='$mobile' AND verifycode='$verifycode' AND getip='" . real_ip() . "' AND status=1 AND dateline>'" . gmtime() ."'-86400";
 			$db->query($sql);
-//互亿无线代码
+            //互亿无线代码
 
 
             /*把新注册用户的扩展信息插入数据库*/
