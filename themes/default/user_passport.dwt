@@ -30,10 +30,21 @@
    <div class="logtitle"></div>
    <form name="formLogin" action="user.php" method="post" onSubmit="return userLogin()">
         <table width="100%" border="0" align="left" cellpadding="3" cellspacing="5">
-          <tr>
+        
+<!--//互亿无线代码-->
+	  <!-- {if $_CFG['ihuyi_sms_mobile_log']=='1'} -->
+	  <tr>
+            <td width="30%" align="right">{$lang.label_username}/手机号</td>
+            <td width="70%"><input name="username" type="text" size="25" class="inputBg" /></td>
+          </tr>
+	  <!-- {else} -->
+	  <tr>
             <td width="15%" align="right">{$lang.label_username}</td>
             <td width="85%"><input name="username" type="text" size="25" class="inputBg" /></td>
           </tr>
+	  <!-- {/if} -->
+<!--//互亿无线代码-->
+
           <tr>
             <td align="right">{$lang.label_password}</td>
             <td>
@@ -58,7 +69,20 @@
             <input type="submit" name="submit" value="" class="us_Submit" />
             </td>
           </tr>
-	  <tr><td></td><td><a href="user.php?act=qpassword_name" class="f3">{$lang.get_password_by_question}</a>&nbsp;&nbsp;&nbsp;<a href="user.php?act=get_password" class="f3">{$lang.get_password_by_mail}</a></td></tr>
+	  <tr>
+      
+      <!--//互亿无线代码-->
+	  <td></td>
+	  <td>
+		<!-- {if $_CFG['ihuyi_sms_mobile_pwd']=='1'} -->
+		<a href="user.php?act=mpassword_name" class="f3">手机短信找回密码</a><br />
+		<!-- {/if} -->
+		<a href="user.php?act=qpassword_name" class="f3">{$lang.get_password_by_question}</a><br />
+		<a href="user.php?act=get_password" class="f3">{$lang.get_password_by_mail}</a>
+	  </td>
+      <!--//互亿无线代码-->
+      
+	  </tr>
       </table>
     </form>
   </div>
@@ -154,6 +178,42 @@
 	  <input name="passwd_answer" type="text" size="25" class="inputBg" maxlengt='20'/><!-- {if $field.is_need} --><span style="color:#FF0000"> *</span><!-- {/if} -->
           </td>
         </tr>
+        
+      <!--//互亿无线代码-->
+	<!-- {elseif $field.reg_field_name=='手机'} -->
+		<!-- {if $_CFG['ihuyi_sms_mobile_reg']=='1'} -->
+        
+            <input type="hidden" id="ztime" value="{$ztime}">
+            <input type="hidden" id="smsyy" value="{$smsyy}">
+             
+            <input type="hidden" id="sms_code" name="sms_code" value="{$sms_code}">
+			{insert_scripts files='global.js'}
+			{insert_scripts files='transport.js'}
+			{insert_scripts files='sms.js'}
+			<tr>
+			  <td align="right" <!-- {if $field.is_need} -->id="extend_field{$field.id}i"<!--{/if}-->>{$field.reg_field_name}
+			  <td>
+			  <input name="extend_field{$field.id}" id="extend_field{$field.id}" type="text" size="25" class="inputBg" maxlength="12" /><!-- {if $field.is_need} --><span style="color:#FF0000"> *</span><!-- {/if} -->
+			  </td>
+			</tr>
+			<tr>
+			  <td align="right">短信验证码
+			  <td>
+			  <input name="sms_verifycode" id="sms_verifycode" type="text" size="25" class="inputBg" maxlength="6" /><span style="color:#FF0000"> <input type="button" id="zphone" value="<!-- {if $smsyy==0} -->获取语音验证码<!--{else}-->获取手机验证码<!-- {/if} -->"  onclick="getverifycode1('extend_field{$field.id}', '{$field.reg_field_name}');"></span>
+			  </td>
+			</tr>
+			
+		<!-- {else} -->
+			<tr>
+			  <td align="right" <!-- {if $field.is_need} -->id="extend_field{$field.id}i"<!--{/if}-->>{$field.reg_field_name}
+			  <td>
+			  <input name="extend_field{$field.id}" id="extend_field{$field.id}" type="text" size="25" class="inputBg" /><!-- {if $field.is_need} --><span style="color:#FF0000"> *</span><!-- {/if} -->
+			  </td>
+			</tr>
+		<!-- {/if} -->
+       <!--//互亿无线代码--> 
+        
+        
 	<!-- {else} -->
         <tr>
           <td align="right" <!-- {if $field.is_need} -->id="extend_field{$field.id}i"<!--{/if}-->>{$field.reg_field_name}
@@ -188,10 +248,17 @@
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
+        
+     <!--//互亿无线代码-->
           <td>&nbsp;</td>
           <td class="actionSub">
           <a href="user.php?act=login">{$lang.want_login}</a><br />
-          <a href="user.php?act=get_password">{$lang.forgot_password}</a>
+	  <!-- {if $_CFG['ihuyi_sms_mobile_pwd']=='1'} -->
+	  <a href="user.php?act=mpassword_name" class="f3">手机短信找回密码</a><br />
+	  <!-- {/if} -->
+	  <a href="user.php?act=qpassword_name" class="f3">{$lang.get_password_by_question}</a>
+      <!--//互亿无线代码-->
+      
           </td>
         </tr>
       </table>
@@ -239,6 +306,46 @@
   </div>
 </div>
 <!--{/if}-->
+
+<!--//互亿无线代码-->
+<!--*找回密码界面 -->
+    <!--{if $action eq 'mpassword_name'} -->
+    {insert_scripts files='utils.js'}
+    <script type="text/javascript">
+    {foreach from=$lang.password_js item=item key=key}
+      var {$key} = "{$item}";
+    {/foreach}
+    </script>
+<div class="usBox">
+  <div class="usBox_2 clearfix">
+    <form action="user.php" method="post" name="getPasswordByMobile" onsubmit="return submitPwdMobileInfo();">
+        <br />
+        <table width="70%" border="0" align="center">
+          <tr>
+            <td colspan="2" align="center"><strong>{$lang.username_and_mobile}</strong></td>
+          </tr>
+          <tr>
+            <td width="29%" align="right">{$lang.username}</td>
+            <td width="61%"><input name="user_name" type="text" size="30" class="inputBg" maxlength="14" /></td>
+          </tr>
+          <tr>
+            <td align="right">{$lang.mobile}</td>
+            <td><input name="mobile" type="text" size="30" class="inputBg" maxlength="12" /></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><input type="hidden" name="act" value="send_pwd_mobile" />
+              <input type="submit" name="submit" value="{$lang.submit}" class="bnt_blue" style="border:none;" />
+              <input name="button" type="button" onclick="history.back()" value="{$lang.back_page_up}" style="border:none;" class="bnt_blue_1" />
+	    </td>
+          </tr>
+        </table>
+        <br />
+      </form>
+  </div>
+</div>
+<!--{/if}-->
+<!--//互亿无线代码-->
 
 <!--*通过问题找回密码的确认找回账号界面 -->
     <!--{if $action eq 'qpassword_name'} -->

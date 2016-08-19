@@ -16,6 +16,7 @@ switch ($action)
         $initData = array(
             'productImageHeight' => $GLOBALS['_CFG']['image_width'],
             'productImageWidth' => $GLOBALS['_CFG']['image_height'],
+            'logined'           => empty($_SESSION['user_id'])?false:true,
             'topicList' => array(),
             'recommendProducts' => array(
                 'hotProductList' => array(),

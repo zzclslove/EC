@@ -9,8 +9,8 @@
  * 这不是一个自由软件！您只能在不用于商业目的的前提下对程序代码进行修改和
  * 使用；不允许对程序代码以任何形式任何目的的再发布。
  * ============================================================================
- * $Author: douqinghua $
- * $Id: flow.php 17218 2011-01-24 04:10:41Z douqinghua $
+ * $Author: yehuaixiao $
+ * $Id: flow.php 17218 2011-01-24 04:10:41Z yehuaixiao $
  */
 
 define('IN_ECS', true);
@@ -46,6 +46,26 @@ $smarty->assign('helps',            get_shop_help());       // 网店帮助
 $smarty->assign('lang',             $_LANG);
 $smarty->assign('show_marketprice', $_CFG['show_marketprice']);
 $smarty->assign('data_dir',    DATA_DIR);       // 数据目录
+
+
+//互亿无线代码
+if ($_REQUEST['step'] == 'cart')
+{
+	require_once(ROOT_PATH . 'includes/lib_sms.php');
+	/* 获取用户手机号 */
+	$sql = "SELECT user_id, mobile_phone FROM " . $ecs->table('users') . " WHERE user_name='$_SESSION[user_name]' LIMIT 1";
+	$row = $db->getRow($sql);
+
+	/* 是否开启强制手机绑定 */
+	if ($_CFG['ihuyi_sms_mobile_cons'] == '1' && (!$row || !ismobile($row['mobile_phone'])))
+	{
+		require_once(ROOT_PATH . 'languages/' .$_CFG['lang']. '/sms.php');
+		show_message($_LANG['ihuyi_sms_mobile_cons_notice'], '绑定手机号', 'user.php?act=bindmobile', 'info');
+	}
+}
+//互亿无线代码
+
+
 
 /*------------------------------------------------------ */
 //-- 添加商品到购物车
@@ -133,13 +153,6 @@ if ($_REQUEST['step'] == 'add_to_cart')
     /* 更新：购物车 */
     else
     {
-        if(!empty($goods->spec))
-        {
-            foreach ($goods->spec as  $key=>$val )
-            {
-                $goods->spec[$key]=intval($val);
-            }
-        }
         // 更新：添加到购物车
         if (addto_cart($goods->goods_id, $goods->number, $goods->spec, $goods->parent))
         {
@@ -187,6 +200,22 @@ elseif ($_REQUEST['step'] == 'link_buy')
 }
 elseif ($_REQUEST['step'] == 'login')
 {
+	
+	
+	
+	
+//互亿无线代码
+if($_CFG['ihuyi_sms_mobile_log']==1){
+	require(dirname(__FILE__) . '/includes/lib_sms.php');
+	$_SESSION['sms_code']=getverifycode();
+	$smarty->assign('sms_code', $_SESSION['sms_code']);
+	$smarty->assign('ztime', $_CFG['ihuyi_sms_smsgap']);
+}
+//互亿无线代码
+
+
+	
+	
     include_once('languages/'. $_CFG['lang']. '/user.php');
 
     /*
@@ -216,9 +245,11 @@ elseif ($_REQUEST['step'] == 'login')
             $smarty->assign('enabled_register_captcha', 1);
             $smarty->assign('rand', mt_rand());
         }
+		
     }
     else
     {
+
         include_once('includes/lib_passport.php');
         if (!empty($_POST['act']) && $_POST['act'] == 'signin')
         {
@@ -239,9 +270,23 @@ elseif ($_REQUEST['step'] == 'login')
                 {
                     show_message($_LANG['invalid_captcha']);
                 }
+
             }
 
-            $_POST['password']=isset($_POST['password']) ? trim($_POST['password']) : '';
+			//互亿无线代码
+				if ($_CFG['ihuyi_sms_mobile_log'] == '1')
+				{
+					require_once(ROOT_PATH . 'includes/lib_sms.php');
+
+					if (ismobile($_POST['username']))
+					{
+						$sql = "SELECT user_name from " . $ecs->table('users') . " WHERE mobile_phone='".$_POST['username']."'";
+						$row = $db->getRow($sql);
+						$_POST['username'] = $row['user_name'];
+					}
+				}
+			//互亿无线代码
+
             if ($user->login($_POST['username'], $_POST['password'],isset($_POST['remember'])))
             {
                 update_user_info();  //更新用户信息
@@ -268,6 +313,35 @@ elseif ($_REQUEST['step'] == 'login')
         }
         elseif (!empty($_POST['act']) && $_POST['act'] == 'signup')
         {
+
+
+		//互亿无线代码
+			if($_CFG['ihuyi_sms_mobile_reg']==1){
+				$mobile = isset($_POST['mobile']) ? trim($_POST['mobile']) : '';//手机号
+				$verifycode = isset($_POST['sms_verifycode']) ? trim($_POST['sms_verifycode']) : '';//验证码
+
+				require_once(ROOT_PATH . 'includes/lib_sms.php');
+				require_once(ROOT_PATH . 'languages/' .$_CFG['lang']. '/sms.php');
+
+				/* 提交的手机号是否已经注册帐号 */
+				$sql = "SELECT COUNT(user_id) FROM " . $ecs->table('users') . " WHERE mobile_phone = '$mobile'";
+				if ($db->getOne($sql) > 0)
+				{
+					show_message($_LANG['mobile_phone_registered']);
+				}
+
+				/* 验证手机号验证码和IP */
+				$sql = "SELECT COUNT(id) FROM " . $ecs->table('verify_code') ." WHERE mobile='$mobile' AND verifycode='$verifycode' AND getip='" . real_ip() . "' AND status=1 AND dateline>'" . gmtime() ."'-86400";//验证码一天内有效
+
+				if ($db->getOne($sql) == 0)
+				{
+					show_message($_LANG['verifycode_mobile_phone_notmatch']);
+				}
+				$other['mobile_phone'] = $mobile;
+			}
+		//互亿无线代码
+
+
             if ((intval($_CFG['captcha']) & CAPTCHA_REGISTER) && gd_version() > 0)
             {
                 if (empty($_POST['captcha']))
@@ -285,7 +359,7 @@ elseif ($_REQUEST['step'] == 'login')
                 }
             }
 
-            if (register(trim($_POST['username']), trim($_POST['password']), trim($_POST['email'])))
+            if (register(trim($_POST['username']), trim($_POST['password']), trim($_POST['email']),$other))//互亿无线代码
             {
                 /* 用户注册成功 */
                 ecs_header("Location: flow.php?step=consignee\n");
@@ -379,19 +453,19 @@ elseif ($_REQUEST['step'] == 'consignee')
          * 保存收货人信息
          */
         $consignee = array(
-            'address_id'    => empty($_POST['address_id']) ? 0  :   intval($_POST['address_id']),
-            'consignee'     => empty($_POST['consignee'])  ? '' :   compile_str(trim($_POST['consignee'])),
-            'country'       => empty($_POST['country'])    ? '' :   intval($_POST['country']),
-            'province'      => empty($_POST['province'])   ? '' :   intval($_POST['province']),
-            'city'          => empty($_POST['city'])       ? '' :   intval($_POST['city']),
-            'district'      => empty($_POST['district'])   ? '' :   intval($_POST['district']),
-            'email'         => empty($_POST['email'])      ? '' :   compile_str($_POST['email']),
-            'address'       => empty($_POST['address'])    ? '' :   compile_str($_POST['address']),
-            'zipcode'       => empty($_POST['zipcode'])    ? '' :   compile_str(make_semiangle(trim($_POST['zipcode']))),
-            'tel'           => empty($_POST['tel'])        ? '' :   compile_str(make_semiangle(trim($_POST['tel']))),
-            'mobile'        => empty($_POST['mobile'])     ? '' :   compile_str(make_semiangle(trim($_POST['mobile']))),
-            'sign_building' => empty($_POST['sign_building']) ? '' :compile_str($_POST['sign_building']),
-            'best_time'     => empty($_POST['best_time'])  ? '' :   compile_str($_POST['best_time']),
+            'address_id'    => empty($_POST['address_id']) ? 0  : intval($_POST['address_id']),
+            'consignee'     => empty($_POST['consignee'])  ? '' : trim($_POST['consignee']),
+            'country'       => empty($_POST['country'])    ? '' : $_POST['country'],
+            'province'      => empty($_POST['province'])   ? '' : $_POST['province'],
+            'city'          => empty($_POST['city'])       ? '' : $_POST['city'],
+            'district'      => empty($_POST['district'])   ? '' : $_POST['district'],
+            'email'         => empty($_POST['email'])      ? '' : $_POST['email'],
+            'address'       => empty($_POST['address'])    ? '' : $_POST['address'],
+            'zipcode'       => empty($_POST['zipcode'])    ? '' : make_semiangle(trim($_POST['zipcode'])),
+            'tel'           => empty($_POST['tel'])        ? '' : make_semiangle(trim($_POST['tel'])),
+            'mobile'        => empty($_POST['mobile'])     ? '' : make_semiangle(trim($_POST['mobile'])),
+            'sign_building' => empty($_POST['sign_building']) ? '' : $_POST['sign_building'],
+            'best_time'     => empty($_POST['best_time'])  ? '' : $_POST['best_time'],
         );
 
         if ($_SESSION['user_id'] > 0)
@@ -1372,11 +1446,11 @@ elseif ($_REQUEST['step'] == 'done')
     }
 
     $_POST['how_oos'] = isset($_POST['how_oos']) ? intval($_POST['how_oos']) : 0;
-    $_POST['card_message'] = isset($_POST['card_message']) ? compile_str($_POST['card_message']) : '';
-    $_POST['inv_type'] = !empty($_POST['inv_type']) ? compile_str($_POST['inv_type']) : '';
-    $_POST['inv_payee'] = isset($_POST['inv_payee']) ? compile_str($_POST['inv_payee']) : '';
-    $_POST['inv_content'] = isset($_POST['inv_content']) ? compile_str($_POST['inv_content']) : '';
-    $_POST['postscript'] = isset($_POST['postscript']) ? compile_str($_POST['postscript']) : '';
+    $_POST['card_message'] = isset($_POST['card_message']) ? htmlspecialchars($_POST['card_message']) : '';
+    $_POST['inv_type'] = !empty($_POST['inv_type']) ? htmlspecialchars($_POST['inv_type']) : '';
+    $_POST['inv_payee'] = isset($_POST['inv_payee']) ? htmlspecialchars($_POST['inv_payee']) : '';
+    $_POST['inv_content'] = isset($_POST['inv_content']) ? htmlspecialchars($_POST['inv_content']) : '';
+    $_POST['postscript'] = isset($_POST['postscript']) ? htmlspecialchars($_POST['postscript']) : '';
 
     $order = array(
         'shipping_id'     => intval($_POST['shipping']),
@@ -1562,6 +1636,10 @@ elseif ($_REQUEST['step'] == 'done')
 
     $order['order_amount']  = number_format($total['amount'], 2, '.', '');
 
+//互亿无线代码
+	$send = false;
+//互亿无线代码
+	
     /* 如果全部使用余额支付，检查余额是否足够 */
     if ($payment['pay_code'] == 'balance' && $order['order_amount'] > 0)
     {
@@ -1576,6 +1654,11 @@ elseif ($_REQUEST['step'] == 'done')
         }
         else
         {
+			
+			//互亿无线代码
+			$send = true;
+			//互亿无线代码
+			
             $order['surplus'] = $order['order_amount'];
             $order['order_amount'] = 0;
         }
@@ -1660,12 +1743,6 @@ elseif ($_REQUEST['step'] == 'done')
             " FROM " .$ecs->table('cart') .
             " WHERE session_id = '".SESS_ID."' AND rec_type = '$flow_type'";
     $db->query($sql);
-
-    $sql = "update " .$GLOBALS['ecs']->table('goods') . " AS a, ".$GLOBALS['ecs']->table('cart') . " AS b ".
-        " set a.goods_sales = a.goods_sales + b.goods_number".
-        " WHERE a.goods_id = b.goods_id AND b.session_id = '".SESS_ID."' AND b.rec_type = '$flow_type'";
-    $db->query($sql);
-    
     /* 修改拍卖活动状态 */
     if ($order['extension_code']=='auction')
     {
@@ -1707,16 +1784,93 @@ elseif ($_REQUEST['step'] == 'done')
         $content = $smarty->fetch('str:' . $tpl['template_content']);
         send_mail($_CFG['shop_name'], $_CFG['service_email'], $tpl['template_subject'], $content, $tpl['is_html']);
     }
+	
+	
+//互亿无线代码
+	/* 客户下订单时给商家发送短信提醒 */
+	if ($_CFG['ihuyi_sms_order_placed'] == '1' && $_CFG['ihuyi_sms_shop_mobile'] != '')
+	{
+		require_once(ROOT_PATH . 'includes/lib_sms.php');
 
-    /* 如果需要，发短信 */
-    if ($_CFG['sms_order_placed'] == '1' && $_CFG['sms_shop_mobile'] != '')
+		$smarty->assign('shop_name',	$_CFG['shop_name']);
+		$smarty->assign('order_sn',		$order['order_sn']);
+		$smarty->assign('consignee',	$order['consignee']);
+		$smarty->assign('tel',			$order['tel']);
+
+		$content = $smarty->fetch('str:' . $_CFG['ihuyi_sms_order_placed_value']);
+		$ret = sendsms($_CFG['ihuyi_sms_shop_mobile'], $content);
+	}
+
+	/* 获取用户手机号 */
+	$sql = "SELECT user_id, mobile_phone FROM " . $ecs->table('users') . " WHERE user_id='$order[user_id]' LIMIT 1";
+	$row = $db->getRow($sql);
+
+	/* 客户下订单时给客户发送短信提醒 */
+	if ($_CFG['ihuyi_sms_customer_placed'] == '1' && $row['mobile_phone'] != '')
+	{
+		require_once(ROOT_PATH . 'includes/lib_sms.php');
+
+		$smarty->assign('shop_name',	$_CFG['shop_name']);
+		$smarty->assign('order_sn',		$order['order_sn']);
+		$smarty->assign('consignee',	$order['consignee']);
+		$smarty->assign('tel',			$order['tel']);
+
+		$content = $smarty->fetch('str:' . $_CFG['ihuyi_sms_customer_placed_value']);
+
+		$ret = sendsms($row['mobile_phone'], $content);
+	}
+
+	/* 余额支付直接发送短信 */
+    if ($send)
+    {
+		/* 客户付款时给商家发送短信提醒 */
+		if ($_CFG['ihuyi_sms_order_payed'] == '1' && $_CFG['ihuyi_sms_shop_mobile'] != '')
+		{
+			require_once(ROOT_PATH . 'includes/lib_sms.php');
+
+			$smarty->assign('shop_name',	$_CFG['shop_name']);
+			$smarty->assign('order_sn',		$order['order_sn']);
+			$smarty->assign('consignee',	$order['consignee']);
+			$smarty->assign('tel',			$order['tel']);
+
+			$content = $smarty->fetch('str:' . $_CFG['ihuyi_sms_order_payed_value']);
+
+			$ret = sendsms($_CFG['ihuyi_sms_shop_mobile'], $content);
+		}
+
+		/* 获取用户手机号 */
+		$sql = "SELECT user_id, mobile_phone FROM " . $ecs->table('users') . " WHERE user_id='$order[user_id]' LIMIT 1";
+		$row = $db->getRow($sql);
+
+		/* 客户付款时给客户发送短信提醒 */
+		if ($_CFG['ihuyi_sms_customer_payed'] == '1' && $row['mobile_phone'] != '')
+		{
+			require_once(ROOT_PATH . 'includes/lib_sms.php');
+
+			$smarty->assign('shop_name',	$_CFG['shop_name']);
+			$smarty->assign('order_sn',		$order['order_sn']);
+			$smarty->assign('time',			date('Y-m-d H:i:s', time()));
+
+			$content = $smarty->fetch('str:' . $_CFG['ihuyi_sms_customer_payed_value']);
+
+			$ret = sendsms($row['mobile_phone'], $content);
+		}
+    }
+	
+	
+	
+//互亿无线代码
+
+
+	/* 如果需要，发短信 ，不需要了注释掉 */
+   /* if ($_CFG['sms_order_placed'] == '1' && $_CFG['sms_shop_mobile'] != '')
     {
         include_once('includes/cls_sms.php');
         $sms = new sms();
         $msg = $order['pay_status'] == PS_UNPAYED ?
             $_LANG['order_placed_sms'] : $_LANG['order_placed_sms'] . '[' . $_LANG['sms_paid'] . ']';
         $sms->send($_CFG['sms_shop_mobile'], sprintf($msg, $order['consignee'], $order['tel']),'', 13,1);
-    }
+    }*/
 
     /* 如果订单金额为0 处理虚拟卡 */
     if ($order['order_amount'] <= 0)
@@ -2160,6 +2314,14 @@ $smarty->assign('integral_scale',  $_CFG['integral_scale']);
 $smarty->assign('step',            $_REQUEST['step']);
 assign_dynamic('shopping_flow');
 
+
+//互亿无线代码
+$smarty->assign('_CFG',$_CFG); //获取配置
+$smarty->assign('ztime', $_CFG['ihuyi_sms_smsgap']);
+$smarty->assign('smsyy',  $_CFG['ihuyi_sms_smsyy'] ==""?-1:$_CFG['ihuyi_sms_smsyy']);
+	
+//互亿无线代码
+
 $smarty->display('flow.dwt');
 
 /*------------------------------------------------------ */
@@ -2197,7 +2359,7 @@ function flow_update_cart($arr)
     foreach ($arr AS $key => $val)
     {
         $val = intval(make_semiangle($val));
-        if ($val <= 0 || !is_numeric($key))
+        if ($val <= 0 && !is_numeric($key))
         {
             continue;
         }
@@ -2331,7 +2493,7 @@ function flow_cart_stock($arr)
     foreach ($arr AS $key => $val)
     {
         $val = intval(make_semiangle($val));
-        if ($val <= 0 || !is_numeric($key))
+        if ($val <= 0)
         {
             continue;
         }

@@ -751,6 +751,23 @@
             alert(password_not_same);
             return false;
           }
+		  
+<!--//互亿无线代码-->		  
+		  <!-- {if $_CFG['ihuyi_sms_mobile_reg']=='1'} -->
+		   if (frm.elements['mobile'].value=="") {
+            alert('请输入手机号');
+            return false;
+          }
+		   if (frm.elements['sms_verifycode'].value =="") {
+            alert('短信验证码不能为空');
+            return false;
+          }
+		  
+		  
+		  
+		  <!-- {/if} -->
+<!--//互亿无线代码-->   
+		  
           return true;
         }
         {/literal}
@@ -763,14 +780,32 @@
             <h6><span>用户登录：</span></h6>
             <form action="flow.php?step=login" method="post" name="loginForm" id="loginForm" onsubmit="return checkLoginForm(this)">
                 <table width="90%" border="0" cellpadding="8" cellspacing="1" bgcolor="#B0D8FF" class="table">
+                 
+                 
+   <!--//互亿无线代码-->
+	  <!-- {if $_CFG['ihuyi_sms_mobile_log']=='1'} -->
                   <tr>
+                    <td bgcolor="#ffffff"><div align="right"><strong>{$lang.username}/手机号</strong></div></td>
+                    <td bgcolor="#ffffff"><input name="username" type="text" class="inputBg" id="username" /></td>
+                  </tr>
+              <!-- {else} -->
+              
+                    <tr>
                     <td bgcolor="#ffffff"><div align="right"><strong>{$lang.username}</strong></div></td>
                     <td bgcolor="#ffffff"><input name="username" type="text" class="inputBg" id="username" /></td>
                   </tr>
+                  
+      	  <!-- {/if} -->
+<!--//互亿无线代码-->            
                   <tr>
                     <td bgcolor="#ffffff"><div align="right"><strong>{$lang.password}</strong></div></td>
                     <td bgcolor="#ffffff"><input name="password" class="inputBg" type="password" /></td>
                   </tr>
+                  
+                  
+                  
+                  
+                  
                   <!-- 判断是否启用验证码{if $enabled_login_captcha} -->
                   <tr>
                     <td bgcolor="#ffffff"><div align="right"><strong>{$lang.comment_captcha}:</strong></div></td>
@@ -821,6 +856,30 @@
                     <td bgcolor="#ffffff"><input name="confirm_password" class="inputBg" type="password" id="confirm_password" onblur="check_conform_password(this.value);" /><br />
             <span style="color:#FF0000" id="conform_password_notice"></span></td>
                   </tr>
+                  
+            <!--//互亿无线代码-->      
+                 <!-- {if $_CFG['ihuyi_sms_mobile_reg']=='1'} --> 
+                 		<input type="hidden" id="ztime" value="{$ztime}">
+           				<input type="hidden" id="smsyy" value="{$smsyy}">
+            
+                		 <input type="hidden" id="sms_code" name="sms_code" value="{$sms_code}">
+                        {insert_scripts files='global.js'}
+                        {insert_scripts files='transport.js'}
+                        {insert_scripts files='smsFlow.js'}
+                  <tr>
+                    <td bgcolor="#ffffff" align="right"><strong>{$lang.mobile}</strong></td>
+                    <td bgcolor="#ffffff"><input name="mobile" class="inputBg" type="text" id="mobile" />  <br />  <span style="color:#FF0000" id="mobile_notice"></span> </td>
+                  </tr>
+                  
+                  <tr>
+                    <td bgcolor="#ffffff" align="right"><strong>短信验证码</strong></td>
+                    <td bgcolor="#ffffff"> <input name="sms_verifycode" id="sms_verifycode" type="text" size="25" class="inputBg" maxlength="6" /><span style="color:#FF0000"> <input type="button" id="zphone" value="<!-- {if $smsyy==0} -->获取语音验证码<!--{else}-->获取短信验证码<!-- {/if} -->"   onclick="getverifycode1('extend_field{$field.id}', '{$field.reg_field_name}');"></span> </td>
+                  </tr>
+                  
+                <!-- {/if} --> 
+              <!--//互亿无线代码-->
+                  
+                  
                   <!-- 判断是否启用验证码{if $enabled_register_captcha} -->
                   <tr>
                     <td bgcolor="#ffffff" align="right"><strong>{$lang.comment_captcha}:</strong></td>

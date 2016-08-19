@@ -446,4 +446,144 @@ $_LANG['back_mail_settings'] = '返回邮件服务器设置';
 $_LANG['mail_settings'] = '邮件服务器设置';
 
 $_LANG['sms_url'] = '<a href="'.$url.'" target="_blank">点此注册手机短信服务</a>';
+
+
+
+//互亿无线代码
+$_LANG['cfg_name']['ihuyi_sms_'] = '互亿无线短信设置';
+
+$_LANG['cfg_name']['ihuyi_sms_debug'] = '调试模式';
+$_LANG['cfg_desc']['ihuyi_sms_debug'] = '<font color="red"><b>如果开启调试模式将不下发短信，请求日志请查看根目录下的日志文件《sms_log_互亿无线短信平台帐号.log》</b></font>';
+
+$_LANG['cfg_name']['ihuyi_sms_user_name'] = '互亿无线短信平台帐号';
+$_LANG['cfg_desc']['ihuyi_sms_user_name'] = '请填写<a href="http://www.ihuyi.com/product.php#reg" target="_blank"><font color="red"><b>互亿无线短信平台</b></font></a>注册的帐号';
+$_LANG['cfg_name']['ihuyi_sms_pass_word'] = '互亿无线短信平台密码';
+$_LANG['cfg_desc']['ihuyi_sms_pass_word'] = '请填写<a href="http://www.ihuyi.com/product.php#reg" target="_blank"><font color="red"><b>互亿无线短信平台</b></font></a>帐号的密码';
+$_LANG['cfg_name']['ihuyi_yy_pass_word'] = '互亿无线语音平台key';
+$_LANG['cfg_desc']['ihuyi_yy_pass_word'] = '请填写<a href="http://www.ihuyi.com/product.php#reg" target="_blank"><font color="red"><b>互亿无线语音平台</b></font></a>帐号的key';
+$_LANG['cfg_name']['ihuyi_sms_shop_mobile'] = '商家手机号码';
+$_LANG['cfg_desc']['ihuyi_sms_shop_mobile'] = '请填写商家自己的手机号码，客户下订单以及付款短信提醒';
+$_LANG['cfg_name']['ihuyi_sms_smsgap'] = '发送短信间隔';
+$_LANG['cfg_desc']['ihuyi_sms_smsgap'] = '前台用户请求发送短信时间间隔（单位秒）';
+
+$_LANG['cfg_name']['ihuyi_sms_mobile_reg'] = '是否开启手机短信验证注册';
+$_LANG['cfg_desc']['ihuyi_sms_mobile_reg'] = '开启后前台用户注册页面必须通过短信验证手机号才能完成注册';
+$_LANG['cfg_name']['ihuyi_sms_mobile_reg_value'] = '手机短信验证注册内容';
+$_LANG['cfg_desc']['ihuyi_sms_mobile_reg_value'] = '手机短信验证注册发送到注册用户手机的短信内容';
+
+$_LANG['cfg_name']['ihuyi_sms_mobile_log'] = '是否开启手机号登陆';
+$_LANG['cfg_desc']['ihuyi_sms_mobile_log'] = '开启后前台用户登录页面可以通过手机号和密码登录网站';
+
+$_LANG['cfg_name']['ihuyi_sms_mobile_pwd'] = '是否开启手机短信找回密码';
+$_LANG['cfg_desc']['ihuyi_sms_mobile_pwd'] = '开启后前台找回密码页面可以通过输入手机号短信找回密码';
+$_LANG['cfg_name']['ihuyi_sms_mobile_pwd_value'] = '手机短信找回密码内容';
+$_LANG['cfg_desc']['ihuyi_sms_mobile_pwd_value'] = '手机短信找回密码发送到找回密码用户手机的短信内容';
+
+$_LANG['cfg_name']['ihuyi_sms_mobile_changepwd'] = '是否开启用户修改密码提醒';
+$_LANG['cfg_desc']['ihuyi_sms_mobile_changepwd'] = '开启后前台用户修改帐号密码会收到短信提醒';
+$_LANG['cfg_name']['ihuyi_sms_mobile_changepwd_value'] = '修改密码提醒内容';
+$_LANG['cfg_desc']['ihuyi_sms_mobile_changepwd_value'] = '修改密码提醒发送到修改密码用户手机的短信内容';
+
+$_LANG['cfg_name']['ihuyi_sms_mobile_bind'] = '是否开启用户手机绑定';
+$_LANG['cfg_desc']['ihuyi_sms_mobile_bind'] = '开启后前台用户登录网站到用户中心-用户信息-个人资料可以（重新）绑定手机号';
+$_LANG['cfg_name']['ihuyi_sms_mobile_bind_value'] = '用户手机绑定内容';
+$_LANG['cfg_desc']['ihuyi_sms_mobile_bind_value'] = '用户绑定手机号发送到用户手机的短信内容';
+
+$_LANG['cfg_name']['ihuyi_sms_mobile_cons'] = '是否开启强制手机绑定';
+$_LANG['cfg_desc']['ihuyi_sms_mobile_cons'] = '开启后用户要下订单必须先绑定手机号否则提示用户绑定';
+
+$_LANG['cfg_name']['ihuyi_sms_customer_registed'] = '是否开启用户注册成功短信提示';
+$_LANG['cfg_name']['ihuyi_sms_customer_registed_value'] = '用户注册成功发送短信内容';
+
+$_LANG['cfg_name']['ihuyi_sms_order_placed'] = '是否开启客户下订单时给商家发送短信';
+$_LANG['cfg_name']['ihuyi_sms_order_placed_value'] = '客户下订单时给商家发送短信内容';
+
+$_LANG['cfg_name']['ihuyi_sms_order_canceled'] = '是否开启客户取消订单时给商家发送短信';
+$_LANG['cfg_name']['ihuyi_sms_order_canceled_value'] = '客户取消订单时给商家发送短信内容';
+
+$_LANG['cfg_name']['ihuyi_sms_order_payed'] = '是否开启客户付款时给商家发送短信';
+$_LANG['cfg_name']['ihuyi_sms_order_payed_value'] = '客户付款时给商家发送短信内容';
+
+$_LANG['cfg_name']['ihuyi_sms_order_confirm'] = '是否开启客户确认收货时给商家发送短信';
+$_LANG['cfg_name']['ihuyi_sms_order_confirm_value'] = '客户确认收货时给商家发送短信内容';
+
+$_LANG['cfg_name']['ihuyi_sms_customer_placed'] = '是否开启客户下订单时给客户发送短信';
+$_LANG['cfg_name']['ihuyi_sms_customer_placed_value'] = '客户下订单时给客户发送短信内容';
+
+$_LANG['cfg_name']['ihuyi_sms_customer_canceled'] = '是否开启客户取消订单时给客户发送短信';
+$_LANG['cfg_name']['ihuyi_sms_customer_canceled_value'] = '客户取消订单时给客户发送短信内容';
+
+$_LANG['cfg_name']['ihuyi_sms_customer_payed'] = '是否开启客户付款时给客户发送短信';
+$_LANG['cfg_name']['ihuyi_sms_customer_payed_value'] = '客户付款时给客户发送短信内容';
+
+$_LANG['cfg_name']['ihuyi_sms_customer_confirm'] = '是否开启客户确认收货时给客户发送短信';
+$_LANG['cfg_name']['ihuyi_sms_customer_confirm_value'] = '客户确认收货时给客户发送短信内容';
+
+$_LANG['cfg_name']['ihuyi_sms_order_picking'] = '是否开启商家配货时给客户发送短信';
+$_LANG['cfg_name']['ihuyi_sms_order_picking_value'] = '商家配货时给客户发送短信内容';
+
+$_LANG['cfg_name']['ihuyi_sms_order_shipped'] = '是否开启商家发货时给客户发送短信';
+$_LANG['cfg_name']['ihuyi_sms_order_shipped_value'] = '商家发货时给客户发送短信内容';
+
+$_LANG['cfg_name']['ihuyi_sms_ip_num'] = '每个IP最多只能发送几条短信';
+$_LANG['cfg_name']['ihuyi_sms_mobile_num'] = '每个手机号一天最多只能发送几条短信';
+
+$_LANG['cfg_name']['ihuyi_sms_smsyy'] = '注册会员语音设置';
+$_LANG['cfg_desc']['ihuyi_sms_smsyy'] = '不使用不填写;仅使用语音验证码设置0;发送短信几次后使用语音验证码则设置大于0的次数;' ;
+
+$_LANG['cfg_range']['ihuyi_sms_debug']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_debug']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_mobile_changepwd']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_mobile_changepwd']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_mobile_reg']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_mobile_reg']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_mobile_log']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_mobile_log']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_mobile_pwd']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_mobile_pwd']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_mobile_bind']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_mobile_bind']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_mobile_cons']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_mobile_cons']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_order_placed']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_order_placed']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_order_canceled']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_order_canceled']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_order_payed']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_order_payed']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_customer_registed']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_customer_registed']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_order_confirm']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_order_confirm']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_customer_placed']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_customer_placed']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_customer_canceled']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_customer_canceled']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_customer_payed']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_customer_payed']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_customer_confirm']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_customer_confirm']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_order_picking']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_order_picking']['0'] = '关闭';
+
+$_LANG['cfg_range']['ihuyi_sms_order_shipped']['1'] = '开启';
+$_LANG['cfg_range']['ihuyi_sms_order_shipped']['0'] = '关闭';
+//互亿无线代码
+
 ?>

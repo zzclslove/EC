@@ -95,6 +95,47 @@ function editPassword()
   }
 }
 
+/* 会员绑定手机 */
+function bindMobile()
+{
+  var frm        = document.forms['formBindmobile'];
+  var mobile     = frm.elements['mobile'].value;
+  var verifycode = frm.elements['verifycode'].value;
+
+  var msg = '';
+  var reg = null;
+
+  if (mobile.length == 0)
+  {
+    msg += '手机号不能为空！\n';
+  }
+
+  if (mobile.length != 11)
+  {
+    msg += '手机号必须为11位！\n';
+  }
+
+  if (verifycode.length == 0)
+  {
+    msg += '验证码不能为空！\n';
+  }
+
+  if (verifycode.length != 6)
+  {
+    msg += '验证码必须为6位！\n';
+  }
+
+  if (msg.length > 0)
+  {
+    alert(msg);
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}
+
 /* *
  * 对会员的留言输入作处理
  */
@@ -165,6 +206,48 @@ function submitPwdInfo()
 
   return true;
 }
+
+
+
+//互亿无线代码
+/* *
+ * 会员找回密码时，对输入作处理
+ */
+function submitPwdMobileInfo()
+{
+  var frm = document.forms['getPasswordByMobile'];
+  var user_name = frm.elements['user_name'].value;
+  var mobile     = frm.elements['mobile'].value;
+
+  var errorMsg = '';
+  if (user_name.length == 0)
+  {
+    errorMsg += user_name_empty + '\n';
+  }
+
+  if (mobile.length == 0)
+  {
+    errorMsg += mobile_address_empty + '\n';
+  }
+  else
+  {
+    if ( ! (Utils.isMobile(mobile)))
+    {
+      errorMsg += mobile_address_error + '\n';
+    }
+  }
+
+  if (errorMsg.length > 0)
+  {
+    alert(errorMsg);
+    return false;
+  }
+
+  return true;
+}
+//互亿无线代码
+
+
 
 /* *
  * 会员找回密码时，对输入作处理

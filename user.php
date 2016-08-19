@@ -28,14 +28,21 @@ $smarty->assign('affiliate', $affiliate);
 $back_act='';
 
 
+
+//互亿无线代码
+$smarty->assign('_CFG', $_CFG);//附加系统配置
 // 不需要登录的操作或自己验证是否登录（如ajax处理）的act
 $not_login_arr =
-array('login','act_login','register','act_register','act_edit_password','get_password','send_pwd_email','password', 'signin', 'add_tag', 'collect', 'return_to_cart', 'logout', 'email_list', 'validate_email', 'send_hash_mail', 'order_query', 'is_registered', 'check_email','clear_history','qpassword_name', 'get_passwd_question', 'check_answer');
+array('login','act_login','register','act_register','act_edit_password','get_password','send_pwd_email','send_pwd_mobile','password', 'signin', 'add_tag', 'collect', 'return_to_cart', 'logout', 'email_list', 'validate_email', 'send_hash_mail', 'order_query', 'is_registered', 'check_email','clear_history','qpassword_name', 'mpassword_name', 'get_passwd_question', 'check_answer');
 
 /* 显示页面的action列表 */
 $ui_arr = array('register', 'login', 'profile', 'order_list', 'order_detail', 'address_list', 'collection_list',
 'message_list', 'tag_list', 'get_password', 'reset_password', 'booking_list', 'add_booking', 'account_raply',
-'account_deposit', 'account_log', 'account_detail', 'act_account', 'pay', 'default', 'bonus', 'group_buy', 'group_buy_detail', 'affiliate', 'comment_list','validate_email','track_packages', 'transform_points','qpassword_name', 'get_passwd_question', 'check_answer');
+'account_deposit', 'account_log', 'account_detail', 'act_account', 'pay', 'default', 'bonus', 'group_buy', 'group_buy_detail', 'affiliate', 'comment_list','validate_email','track_packages', 'transform_points','qpassword_name', 'mpassword_name', 'get_passwd_question','send_pwd_mobile', 'check_answer','bindmobile');
+//互亿无线代码
+
+
+
 
 /* 未登录处理 */
 if (empty($_SESSION['user_id']))
@@ -130,6 +137,16 @@ if ($action == 'register')
 
     /* 密码提示问题 */
     $smarty->assign('passwd_questions', $_LANG['passwd_questions']);
+	
+//互亿无线代码
+	require(dirname(__FILE__) . '/includes/lib_sms.php');
+	$_SESSION['sms_code']=getverifycode();
+	$smarty->assign('sms_code', $_SESSION['sms_code']);
+	$smarty->assign('ztime', $_CFG['ihuyi_sms_smsgap']);
+	$smarty->assign('smsyy',  $_CFG['ihuyi_sms_smsyy'] ==""?-1:$_CFG['ihuyi_sms_smsyy']);
+	
+	
+//互亿无线代码
 
     /* 增加是否关闭注册 */
     $smarty->assign('shop_reg_closed', $_CFG['shop_reg_closed']);
@@ -159,8 +176,8 @@ elseif ($action == 'act_register')
         $other['office_phone'] = isset($_POST['extend_field3']) ? $_POST['extend_field3'] : '';
         $other['home_phone'] = isset($_POST['extend_field4']) ? $_POST['extend_field4'] : '';
         $other['mobile_phone'] = isset($_POST['extend_field5']) ? $_POST['extend_field5'] : '';
-        $sel_question = empty($_POST['sel_question']) ? '' : compile_str($_POST['sel_question']);
-        $passwd_answer = isset($_POST['passwd_answer']) ? compile_str(trim($_POST['passwd_answer'])) : '';
+        $sel_question = empty($_POST['sel_question']) ? '' : $_POST['sel_question'];
+        $passwd_answer = isset($_POST['passwd_answer']) ? trim($_POST['passwd_answer']) : '';
 
 
         $back_act = isset($_POST['back_act']) ? trim($_POST['back_act']) : '';
@@ -184,6 +201,48 @@ elseif ($action == 'act_register')
             show_message($_LANG['passwd_balnk']);
         }
 
+//互亿无线代码
+		$mobile = isset($_POST['extend_field5']) ? trim($_POST['extend_field5']) : '';//手机号
+		$verifycode = isset($_POST['sms_verifycode']) ? trim($_POST['sms_verifycode']) : '';//验证码
+
+		if ($_CFG['ihuyi_sms_mobile_reg'] == '1')
+		{
+			require_once(ROOT_PATH . 'includes/lib_sms.php');
+			require_once(ROOT_PATH . 'languages/' .$_CFG['lang']. '/sms.php');
+
+			/* 提交的手机号是否正确 */
+			if(!ismobile($mobile)) {
+				show_message($_LANG['invalid_mobile_phone']);
+			}
+
+			/* 提交的验证码不能为空 */
+			if(empty($verifycode)) {
+				show_message($_LANG['verifycode_empty']);
+			}
+
+			/* 提交的验证码是否正确 */
+			if(empty($mobile)) {
+				show_message($_LANG['invalid_verify_code']);
+			}
+
+			/* 提交的手机号是否已经注册帐号 */
+			$sql = "SELECT COUNT(user_id) FROM " . $ecs->table('users') . " WHERE mobile_phone = '$mobile'";
+
+			if ($db->getOne($sql) > 0)
+			{
+				show_message($_LANG['mobile_phone_registered']);
+			}
+
+			/* 验证手机号验证码和IP */
+			$sql = "SELECT COUNT(id) FROM " . $ecs->table('verify_code') ." WHERE mobile='$mobile' AND verifycode='$verifycode' AND getip='" . real_ip() . "' AND status=1 AND dateline>'" . gmtime() ."'-86400";//验证码一天内有效
+
+			if ($db->getOne($sql) == 0)
+			{
+				show_message($_LANG['verifycode_mobile_phone_notmatch']);
+			}
+		}
+//互亿无线代码
+
         /* 验证码检查 */
         if ((intval($_CFG['captcha']) & CAPTCHA_REGISTER) && gd_version() > 0)
         {
@@ -204,6 +263,36 @@ elseif ($action == 'act_register')
 
         if (register($username, $password, $email, $other) !== false)
         {
+		
+		
+		//互亿无线代码
+			if ($_CFG['ihuyi_sms_customer_registed'] == '1')
+			{
+				require_once(ROOT_PATH . 'includes/lib_sms.php');
+				require_once(ROOT_PATH . 'languages/' .$_CFG['lang']. '/sms.php');
+
+				$smarty->assign('shop_name',	$_CFG['shop_name']);
+				$smarty->assign('user_name',	$username);
+				$smarty->assign('user_pwd',		$password);
+
+				$content = $smarty->fetch('str:' . $_CFG['ihuyi_sms_customer_registed_value']);
+				
+				/* 发送注册成功短信提醒 */
+				$ret = sendsms($other['mobile_phone'], $content);
+				
+				if($ret === true)
+				{
+					//插入注册成功短信提醒数据记录
+					$sql = "INSERT INTO " . $ecs->table('verify_code') . "(mobile, getip, verifycode, dateline, reguid, status) VALUES ('" . $other['mobile_phone'] . "', '" . real_ip() . "', '$password', '" . gmtime() ."', $_SESSION[user_id], 7)";
+					$db->query($sql);
+				}
+			}
+
+			$sql = "UPDATE " . $ecs->table('verify_code') . " SET reguid=" . $_SESSION['user_id'] . ",regdateline='" . gmtime() ."',status=2 WHERE mobile='$mobile' AND verifycode='$verifycode' AND getip='" . real_ip() . "' AND status=1 AND dateline>'" . gmtime() ."'-86400";
+			$db->query($sql);
+//互亿无线代码
+
+
             /*把新注册用户的扩展信息插入数据库*/
             $sql = 'SELECT id FROM ' . $ecs->table('reg_fields') . ' WHERE type = 0 AND display = 1 ORDER BY dis_order, id';   //读出所有自定义扩展字段的id
             $fields_arr = $db->getAll($sql);
@@ -215,7 +304,7 @@ elseif ($action == 'act_register')
                 if(!empty($_POST[$extend_field_index]))
                 {
                     $temp_field_content = strlen($_POST[$extend_field_index]) > 100 ? mb_substr($_POST[$extend_field_index], 0, 99) : $_POST[$extend_field_index];
-                    $extend_field_str .= " ('" . $_SESSION['user_id'] . "', '" . $val['id'] . "', '" . compile_str($temp_field_content) . "'),";
+                    $extend_field_str .= " ('" . $_SESSION['user_id'] . "', '" . $val['id'] . "', '" . $temp_field_content . "'),";
                 }
             }
             $extend_field_str = substr($extend_field_str, 0, -1);
@@ -352,6 +441,22 @@ elseif ($action == 'act_login')
             show_message($_LANG['invalid_captcha'], $_LANG['relogin_lnk'], 'user.php', 'error');
         }
     }
+
+
+//互亿无线代码
+	if ($_CFG['ihuyi_sms_mobile_log'] == '1')
+	{
+		require_once(ROOT_PATH . 'includes/lib_sms.php');
+
+		if (ismobile($username))
+		{
+			$sql = "SELECT user_name from " . $ecs->table('users') . " WHERE mobile_phone='$username'";
+			$row = $db->getRow($sql);
+			$username = $row['user_name'];
+		}
+	}
+//互亿无线代码
+
 
     if ($user->login($username, $password,isset($_POST['remember'])))
     {
@@ -496,8 +601,8 @@ elseif ($action == 'act_edit_profile')
     $other['office_phone'] = $office_phone = isset($_POST['extend_field3']) ? trim($_POST['extend_field3']) : '';
     $other['home_phone'] = $home_phone = isset($_POST['extend_field4']) ? trim($_POST['extend_field4']) : '';
     $other['mobile_phone'] = $mobile_phone = isset($_POST['extend_field5']) ? trim($_POST['extend_field5']) : '';
-    $sel_question = empty($_POST['sel_question']) ? '' : compile_str($_POST['sel_question']);
-    $passwd_answer = isset($_POST['passwd_answer']) ? compile_str(trim($_POST['passwd_answer'])) : '';
+    $sel_question = empty($_POST['sel_question']) ? '' : $_POST['sel_question'];
+    $passwd_answer = isset($_POST['passwd_answer']) ? trim($_POST['passwd_answer']) : '';
 
     /* 更新用户扩展字段的数据 */
     $sql = 'SELECT id FROM ' . $ecs->table('reg_fields') . ' WHERE type = 0 AND display = 1 ORDER BY dis_order, id';   //读出所有扩展字段的id
@@ -562,6 +667,10 @@ elseif ($action == 'act_edit_profile')
         'birthday' => $birthday,
         'other'    => isset($other) ? $other : array()
         );
+		
+//互亿无线代码		
+	unset($profile['other']['mobile_phone']);
+//互亿无线代码
 
 
     if (edit_profile($profile))
@@ -617,6 +726,15 @@ elseif ($action == 'qpassword_name')
     //显示输入要找回密码的账号表单
     $smarty->display('user_passport.dwt');
 }
+
+//互亿无线代码
+/* 密码找回-->输入用户名界面 */
+elseif ($action == 'mpassword_name')
+{
+    //显示输入要找回密码的账号表单
+    $smarty->display('user_passport.dwt');
+}
+//互亿无线代码
 
 /* 密码找回-->根据注册用户名取得密码提示问题界面 */
 elseif ($action == 'get_passwd_question')
@@ -729,6 +847,154 @@ elseif ($action == 'send_pwd_email')
     }
 }
 
+
+
+//互亿无线代码
+
+/* 手机短信找回密码 */
+elseif ($action == 'send_pwd_mobile')
+{
+	require_once(ROOT_PATH . 'includes/lib_sms.php');
+	require_once(ROOT_PATH . 'languages/' .$_CFG['lang']. '/sms.php');
+
+	if ($_CFG['ihuyi_sms_mobile_pwd'] == '0')
+		show_message($_LANG['ihuyi_sms_mobile_pwd_closed']);
+
+    include_once(ROOT_PATH . 'includes/lib_passport.php');
+
+    /* 初始化会员用户名和手机 */
+    $user_name = !empty($_POST['user_name']) ? trim($_POST['user_name']) : '';
+    $mobile     = !empty($_POST['mobile'])     ? trim($_POST['mobile'])     : '';
+
+	/* 用户名和手机是否匹配 */
+    $sql = "SELECT COUNT(user_id) FROM " . $ecs->table('users') ." WHERE mobile_phone = '$mobile' and user_name = '$user_name'";
+
+    if ($db->getOne($sql) > 0)
+    {
+		/* 是否找回过密码 */
+		$sql = "SELECT COUNT(id) FROM " . $ecs->table('verify_code') ." WHERE status=3 AND getip='" . real_ip() . "' AND dateline>'" . gmtime() ."'-".$_CFG['ihuyi_sms_smsgap'];
+
+		if ($db->getOne($sql) > 0)
+		{
+			$message = sprintf($_LANG['send_pwd_mobile_excessived'], $_CFG['ihuyi_sms_smsgap']);
+			show_message($message, $_LANG['back_page_up'], '', 'info');
+		}
+
+		$new_password = getverifycode();
+
+		$smarty->assign('shop_name',	$_CFG['shop_name']);
+		$smarty->assign('user_name',	$user_name);
+		$smarty->assign('new_password', $new_password);
+
+		$content = $smarty->fetch('str:' . $_CFG['ihuyi_sms_mobile_pwd_value']);
+		
+		/* 发送注册手机短信验证 */
+		$ret = sendsms($mobile, $content);
+		
+		if($ret === true)
+		{
+			//插入获取验证码数据记录
+			$sql = "INSERT INTO " . $ecs->table('verify_code') . "(mobile, getip, verifycode, dateline, status) VALUES ('" . $mobile . "', '" . real_ip() . "', '$new_password', '" . gmtime() ."', 3)";
+			$db->query($sql);
+
+			if ($user->edit_user(array('username'=> $user_name, 'old_password'=>null, 'password'=>$new_password), 1))
+			{
+				$sql="UPDATE ".$ecs->table('users'). "SET `ec_salt`='0' WHERE user_name= '".$user_name."'";
+				$db->query($sql);
+
+				$user->logout();
+				show_message($_LANG['send_pwd_mobile_success'], $_LANG['relogin_lnk'], 'user.php?act=login', 'info');
+			}
+			else
+			{
+				show_message($_LANG['send_pwd_mobile_false'], $_LANG['back_page_up'], '', 'info');
+			}
+		}
+		else
+		{
+			show_message($_LANG['send_pwd_mobile_failured'] . $ret, $_LANG['back_page_up'], '', 'info');
+		}
+	}
+    else
+    {
+        //用户名与手机不匹配
+        show_message($_LANG['username_no_mobile'], $_LANG['back_page_up'], '', 'info');
+    }
+}
+
+/* 绑定手机页面 */
+elseif ($action == 'bindmobile')
+{
+	
+	require(dirname(__FILE__) . '/includes/lib_sms.php');
+	$_SESSION['sms_code']=getverifycode();
+	$smarty->assign('sms_code', $_SESSION['sms_code']);
+	$smarty->assign('ztime', $_CFG['ihuyi_sms_smsgap']);
+	
+    $smarty->display('user_transaction.dwt');
+}
+
+/* 绑定手机页面 */
+elseif ($action == 'act_bindmobile')
+{
+	require_once(ROOT_PATH . 'includes/lib_sms.php');
+	require_once(ROOT_PATH . 'languages/' .$_CFG['lang']. '/sms.php');
+
+    $mobile = isset($_POST['mobile']) ? trim($_POST['mobile']) : '';//手机号
+	$verifycode = isset($_POST['verifycode']) ? trim($_POST['verifycode']) : '';//验证码
+
+	if ($_CFG['ihuyi_sms_mobile_bind'] == '1')
+	{
+		/* 提交的手机号是否正确 */
+		if(!ismobile($mobile)) {
+			show_message($_LANG['invalid_mobile_phone']);
+		}
+
+		/* 提交的验证码不能为空 */
+		if(empty($verifycode)) {
+			show_message($_LANG['verifycode_empty']);
+		}
+
+		/* 提交的验证码是否正确 */
+		if(empty($mobile)) {
+			show_message($_LANG['invalid_verify_code']);
+		}
+
+		/* 提交的手机号是否已经绑定帐号 */
+		$sql = "SELECT COUNT(user_id) FROM " . $ecs->table('users') . " WHERE mobile_phone = '$mobile'";
+
+		if ($db->getOne($sql) > 0)
+		{
+			show_message($_LANG['mobile_phone_binded']);
+		}
+
+		/* 验证手机号验证码和IP */
+		$sql = "SELECT COUNT(id) FROM " . $ecs->table('verify_code') ." WHERE mobile='$mobile' AND verifycode='$verifycode' AND getip='" . real_ip() . "' AND status=4 AND dateline>'" . gmtime() ."'-86400";//验证码一天内有效
+
+		if ($db->getOne($sql) == 0)
+		{
+			//手机号与验证码不匹配
+			show_message($_LANG['verifycode_mobile_phone_notmatch']);
+		}
+
+		/* 更新验证码表更新用户手机字段 */
+		$sql = "UPDATE " . $ecs->table('verify_code') . " SET reguid=" . $_SESSION['user_id'] . ",regdateline='" . gmtime() ."',status=5 WHERE mobile='$mobile' AND verifycode='$verifycode' AND getip='" . real_ip() . "' AND status=4 AND dateline>'" . gmtime() ."'-86400";
+		$db->query($sql);
+		$sql = "UPDATE " . $ecs->table('users') . " SET mobile_phone='" . $mobile ."' WHERE user_id=" . $_SESSION['user_id'] . "";
+		$db->query($sql);
+
+		show_message($_LANG['bind_mobile_success'], $_LANG['back_page_up'], 'user.php?act=profile', 'info');
+	}
+	else
+	{
+		//手机绑定未开启
+        show_message($_LANG['ihuyi_sms_mobile_bind_closed'], $_LANG['back_page_up'], '', 'info');
+	}
+}
+//互亿无线代码
+
+
+
 /* 重置新密码 */
 elseif ($action == 'reset_password')
 {
@@ -739,6 +1005,11 @@ elseif ($action == 'reset_password')
 /* 修改会员密码 */
 elseif ($action == 'act_edit_password')
 {
+	
+//互亿无线代码
+	require_once(ROOT_PATH . 'includes/lib_sms.php');
+//互亿无线代码
+	
     include_once(ROOT_PATH . 'includes/lib_passport.php');
 
     $old_password = isset($_POST['old_password']) ? trim($_POST['old_password']) : null;
@@ -755,13 +1026,43 @@ elseif ($action == 'act_edit_password')
 
     if (($user_info && (!empty($code) && md5($user_info['user_id'] . $_CFG['hash_code'] . $user_info['reg_time']) == $code)) || ($_SESSION['user_id']>0 && $_SESSION['user_id'] == $user_id && $user->check_user($_SESSION['user_name'], $old_password)))
     {
-		
         if ($user->edit_user(array('username'=> (empty($code) ? $_SESSION['user_name'] : $user_info['user_name']), 'old_password'=>$old_password, 'password'=>$new_password), empty($code) ? 0 : 1))
         {
+			
+			
+//互亿无线代码
+			/* 获取用户手机号 */
+			$sql = "SELECT user_id, mobile_phone FROM " . $ecs->table('users') . " WHERE user_name='$user_info[user_name]' LIMIT 1";
+            $row = $db->getRow($sql);
+
+			/* 修改会员密码成功后给用户发送短信提醒 */
+			if ($_CFG['ihuyi_sms_mobile_changepwd'] == '1' && $row && ismobile($row['mobile_phone']))
+			{
+				$smarty->assign('shop_name',	$_CFG['shop_name']);
+				$smarty->assign('user_name',	$_SESSION['user_name']);
+				$smarty->assign('new_password', $new_password);
+
+				$content = $smarty->fetch('str:' . $_CFG['ihuyi_sms_mobile_changepwd_value']);
+				
+				/* 发送修改密码短信提醒 */
+				$ret = sendsms($row['mobile_phone'], $content);
+				
+				if($ret === true)
+				{
+					//插入密码短信提醒数据记录
+					$sql = "INSERT INTO " . $ecs->table('verify_code') . "(mobile, getip, verifycode, dateline, reguid, status) VALUES ('" . $row['mobile_phone'] . "', '" .  real_ip() . "', '$new_password', '" . gmtime() ."', $_SESSION[user_id], 6)";
+					$db->query($sql);
+				}
+			}
+
+//互亿无线代码
+
+
 			$sql="UPDATE ".$ecs->table('users'). "SET `ec_salt`='0' WHERE user_id= '".$user_id."'";
 			$db->query($sql);
-            $user->logout();
-            show_message($_LANG['edit_password_success'], $_LANG['relogin_lnk'], 'user.php?act=login', 'info');
+			
+			$user->logout();
+			show_message($_LANG['edit_password_success'], $_LANG['relogin_lnk'], 'user.php?act=login', 'info');
         }
         else
         {
@@ -900,6 +1201,41 @@ elseif ($action == 'cancel_order')
 
     if (cancel_order($order_id, $user_id))
     {
+		
+//互亿无线代码
+		/* 客户取消订单时给商家发送短信提醒 */
+		if ($_CFG['ihuyi_sms_order_canceled'] == '1' && $_CFG['ihuyi_sms_shop_mobile'] != '')
+		{
+			require_once(ROOT_PATH . 'includes/lib_sms.php');
+
+			$smarty->assign('shop_name',	$_CFG['shop_name']);
+			$sql = "SELECT order_sn FROM " . $ecs->table('order_info') . " WHERE order_id='$order_id' LIMIT 1";
+			$row = $db->getRow($sql);			
+			$smarty->assign('order_sn',		$row['order_sn']);
+
+			$content = $smarty->fetch('str:' . $_CFG['ihuyi_sms_order_canceled_value']);
+			$ret = sendsms($_CFG['ihuyi_sms_shop_mobile'], $content);
+		}
+
+		/* 获取用户手机号 */
+		$sql = "SELECT user_id, mobile_phone FROM " . $ecs->table('users') . " WHERE user_name='$_SESSION[user_name]' LIMIT 1";
+		$row = $db->getRow($sql);
+
+		/* 客户取消订单时给客户发送短信提醒 */
+		if ($_CFG['ihuyi_sms_customer_canceled'] == '1' && $row['mobile_phone'] != '')
+		{
+			require_once(ROOT_PATH . 'includes/lib_sms.php');
+
+			$smarty->assign('shop_name',	$_CFG['shop_name']);
+			$sql = "SELECT order_sn FROM " . $ecs->table('order_info') . " WHERE order_id='$order_id' LIMIT 1";
+			$row_order = $db->getRow($sql);			
+			$smarty->assign('order_sn',		$row_order['order_sn']);
+
+			$content = $smarty->fetch('str:' . $_CFG['ihuyi_sms_customer_canceled_value']);
+			$ret = sendsms($row['mobile_phone'], $content);
+		}
+//互亿无线代码
+
         ecs_header("Location: user.php?act=order_list\n");
         exit;
     }
@@ -975,14 +1311,14 @@ elseif ($action == 'act_edit_address')
         'province'   => isset($_POST['province'])  ? intval($_POST['province']) : 0,
         'city'       => isset($_POST['city'])      ? intval($_POST['city'])     : 0,
         'district'   => isset($_POST['district'])  ? intval($_POST['district']) : 0,
-        'address'    => isset($_POST['address'])   ? compile_str(trim($_POST['address']))    : '',
-        'consignee'  => isset($_POST['consignee']) ? compile_str(trim($_POST['consignee']))  : '',
-        'email'      => isset($_POST['email'])     ? compile_str(trim($_POST['email']))      : '',
-        'tel'        => isset($_POST['tel'])       ? compile_str(make_semiangle(trim($_POST['tel']))) : '',
-        'mobile'     => isset($_POST['mobile'])    ? compile_str(make_semiangle(trim($_POST['mobile']))) : '',
-        'best_time'  => isset($_POST['best_time']) ? compile_str(trim($_POST['best_time']))  : '',
-        'sign_building' => isset($_POST['sign_building']) ? compile_str(trim($_POST['sign_building'])) : '',
-        'zipcode'       => isset($_POST['zipcode'])       ? compile_str(make_semiangle(trim($_POST['zipcode']))) : '',
+        'address'    => isset($_POST['address'])   ? trim($_POST['address'])    : '',
+        'consignee'  => isset($_POST['consignee']) ? trim($_POST['consignee'])  : '',
+        'email'      => isset($_POST['email'])     ? trim($_POST['email'])      : '',
+        'tel'        => isset($_POST['tel'])       ? make_semiangle(trim($_POST['tel'])) : '',
+        'mobile'     => isset($_POST['mobile'])    ? make_semiangle(trim($_POST['mobile'])) : '',
+        'best_time'  => isset($_POST['best_time']) ? trim($_POST['best_time'])  : '',
+        'sign_building' => isset($_POST['sign_building']) ? trim($_POST['sign_building']) : '',
+        'zipcode'       => isset($_POST['zipcode'])       ? make_semiangle(trim($_POST['zipcode'])) : '',
         );
 
     if (update_address($address))
@@ -1299,6 +1635,40 @@ elseif ($action == 'affirm_received')
 
     if (affirm_received($order_id, $user_id))
     {
+		
+		
+//互亿无线代码
+		/* 客户确认收货时给商家发送短信提醒 */
+		if ($_CFG['ihuyi_sms_order_confirm'] == '1' && $_CFG['ihuyi_sms_shop_mobile'] != '')
+		{
+			require_once(ROOT_PATH . 'includes/lib_sms.php');
+
+			$smarty->assign('shop_name',	$_CFG['shop_name']);
+			$smarty->assign('order_sn',		$_GET['order_sn']);
+
+			$content = $smarty->fetch('str:' . $_CFG['ihuyi_sms_order_confirm_value']);
+
+			$ret = sendsms($_CFG['ihuyi_sms_shop_mobile'], $content);
+		}
+
+		/* 获取用户手机号 */
+		$sql = "SELECT user_id, mobile_phone FROM " . $ecs->table('users') . " WHERE user_name='$_SESSION[user_name]' LIMIT 1";
+		$row = $db->getRow($sql);
+
+		/* 客户确认收货时给客户发送短信提醒 */
+		if ($_CFG['ihuyi_sms_customer_confirm'] == '1' && $row['mobile_phone'] != '')
+		{
+			require_once(ROOT_PATH . 'includes/lib_sms.php');
+
+			$smarty->assign('shop_name',	$_CFG['shop_name']);
+			$smarty->assign('order_sn',		$_GET['order_sn']);
+
+			$content = $smarty->fetch('str:' . $_CFG['ihuyi_sms_customer_confirm_value']);
+
+			$ret = sendsms($row['mobile_phone'], $content);
+		}
+//互亿无线代码
+
         ecs_header("Location: user.php?act=order_list\n");
         exit;
     }
@@ -2017,16 +2387,16 @@ elseif ($action == 'act_edit_payment')
 elseif ($action == 'save_order_address')
 {
     include_once(ROOT_PATH .'includes/lib_transaction.php');
-    
+
     $address = array(
-        'consignee' => isset($_POST['consignee']) ? compile_str(trim($_POST['consignee']))  : '',
-        'email'     => isset($_POST['email'])     ? compile_str(trim($_POST['email']))      : '',
-        'address'   => isset($_POST['address'])   ? compile_str(trim($_POST['address']))    : '',
-        'zipcode'   => isset($_POST['zipcode'])   ? compile_str(make_semiangle(trim($_POST['zipcode']))) : '',
-        'tel'       => isset($_POST['tel'])       ? compile_str(trim($_POST['tel']))        : '',
-        'mobile'    => isset($_POST['mobile'])    ? compile_str(trim($_POST['mobile']))     : '',
-        'sign_building' => isset($_POST['sign_building']) ? compile_str(trim($_POST['sign_building'])) : '',
-        'best_time' => isset($_POST['best_time']) ? compile_str(trim($_POST['best_time']))  : '',
+        'consignee' => isset($_POST['consignee']) ? trim($_POST['consignee'])  : '',
+        'email'     => isset($_POST['email'])     ? trim($_POST['email'])      : '',
+        'address'   => isset($_POST['address'])   ? trim($_POST['address'])    : '',
+        'zipcode'   => isset($_POST['zipcode'])   ? make_semiangle(trim($_POST['zipcode'])) : '',
+        'tel'       => isset($_POST['tel'])       ? trim($_POST['tel'])        : '',
+        'mobile'    => isset($_POST['mobile'])    ? trim($_POST['mobile'])     : '',
+        'sign_building' => isset($_POST['sign_building']) ? trim($_POST['sign_building']) : '',
+        'best_time' => isset($_POST['best_time']) ? trim($_POST['best_time'])  : '',
         'order_id'  => isset($_POST['order_id'])  ? intval($_POST['order_id']) : 0
         );
     if (save_order_address($address, $user_id))

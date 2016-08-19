@@ -108,16 +108,10 @@ function get_goods_name_by_id($order_id)
  */
 function check_money($log_id, $money)
 {
-    if(is_numeric($log_id))
-    {
-        $sql = 'SELECT order_amount FROM ' . $GLOBALS['ecs']->table('pay_log') .
+    $sql = 'SELECT order_amount FROM ' . $GLOBALS['ecs']->table('pay_log') .
               " WHERE log_id = '$log_id'";
-        $amount = $GLOBALS['db']->getOne($sql);
-    }
-    else
-    {
-        return false;
-    }
+    $amount = $GLOBALS['db']->getOne($sql);
+
     if ($money == $amount)
     {
         return true;
@@ -179,14 +173,43 @@ function order_paid($log_id, $pay_status = PS_PAYED, $note = '')
                 /* 记录订单操作记录 */
                 order_action($order_sn, OS_CONFIRMED, SS_UNSHIPPED, $pay_status, $note, $GLOBALS['_LANG']['buyer']);
 
-                /* 如果需要，发短信 */
-                if ($GLOBALS['_CFG']['sms_order_payed'] == '1' && $GLOBALS['_CFG']['sms_shop_mobile'] != '')
-                {
-                    include_once(ROOT_PATH.'includes/cls_sms.php');
-                    $sms = new sms();
-                    $sms->send($GLOBALS['_CFG']['sms_shop_mobile'],
-                        sprintf($GLOBALS['_LANG']['order_payed_sms'], $order_sn, $order['consignee'], $order['tel']),'', 13,1);
-                }
+//互亿无线修改
+				global $smarty;
+
+				/* 客户付款时给商家发送短信提醒 */
+				if ($GLOBALS['_CFG']['ihuyi_sms_order_payed'] == '1' && $GLOBALS['_CFG']['ihuyi_sms_shop_mobile'] != '')
+				{
+					require_once(ROOT_PATH . 'includes/lib_sms.php');
+
+					$smarty->assign('shop_name',	$GLOBALS['_CFG']['shop_name']);
+					$smarty->assign('order_sn',		$order['order_sn']);
+					$smarty->assign('consignee',	$order['consignee']);
+					$smarty->assign('tel',			$order['tel']);
+
+					$content = $smarty->fetch('str:' . $GLOBALS['_CFG']['ihuyi_sms_order_payed_value']);
+
+					$ret = sendsms($GLOBALS['_CFG']['ihuyi_sms_shop_mobile'], $content);
+				}
+
+				/* 获取用户手机号 */
+				$sql = "SELECT user_id, mobile_phone FROM " . $GLOBALS['ecs']->table('users') . " WHERE user_id='$order[user_id]' LIMIT 1";
+				$row = $GLOBALS['db']->getRow($sql);
+
+				/* 客户付款时给客户发送短信提醒 */
+				if ($GLOBALS['_CFG']['ihuyi_sms_customer_payed'] == '1' && $row['mobile_phone'] != '')
+				{
+					require_once(ROOT_PATH . 'includes/lib_sms.php');
+
+					$smarty->assign('shop_name',	$GLOBALS['_CFG']['shop_name']);
+					$smarty->assign('order_sn',		$order['order_sn']);
+					$smarty->assign('time',			local_date(date('Y-m-d H:i:s', time())));
+
+					$content = $smarty->fetch('str:' . $GLOBALS['_CFG']['ihuyi_sms_customer_payed_value']);
+
+					$ret = sendsms($row['mobile_phone'], $content);
+				}
+//互亿无线修改
+
 
                 /* 对虚拟商品的支持 */
                 $virtual_goods = get_virtual_goods($order_id);

@@ -71,6 +71,23 @@ Utils.isEmail = function( email )
   return reg1.test( email );
 }
 
+
+//互亿无线代码
+Utils.isMobile = function( mobile )
+{
+  var reg1 = /^1[358][\d]{9}$/;
+  var reg2 = /^0[\d]{10,11}$/;
+
+  if (reg1.test( mobile ))
+	return true;
+
+  if (reg2.test( mobile ))
+	return true;
+
+  return false;
+}
+//互亿无线代码
+
 Utils.isTel = function ( tel )
 {
   var reg = /^[\d|\-|\s|\_]+$/; //只允许使用数字-空格等

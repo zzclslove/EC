@@ -86,6 +86,28 @@
 		  <input name="passwd_answer" type="text" size="25" class="inputBg" maxlengt='20' value="{$profile.passwd_answer}"/><!-- {if $field.is_need} --><span style="color:#FF0000"> *</span><!-- {/if} -->
 		  </td>
 		</tr>
+        
+    <!--//互亿无线代码-->
+		<!-- {elseif $field.reg_field_name=='手机'} -->
+			<!-- {if $_CFG['ihuyi_sms_mobile_bind']=='1'} -->
+				<td width="28%" align="right" bgcolor="#FFFFFF" <!-- {if $field.is_need} -->id="extend_field{$field.id}i"<!--{/if}-->>{$field.reg_field_name}：</td>
+				<td width="72%" align="left" bgcolor="#FFFFFF">
+				<input name="extend_field{$field.id}" type="text" class="inputBg" value="{$field.content}" readonly="readonly" /><!-- {if $field.is_need} --><span style="color:#FF0000"> *</span><!-- {/if} -->
+				&nbsp;
+				<!-- {if $field.content!=''} -->
+				<a href="user.php?act=bindmobile">重新绑定</a>
+				<!-- {else} -->
+				<a href="user.php?act=bindmobile">绑定手机</a>
+				<!-- {/if} -->
+				</td>
+			<!-- {else} -->
+				<td width="28%" align="right" bgcolor="#FFFFFF" <!-- {if $field.is_need} -->id="extend_field{$field.id}i"<!--{/if}-->>{$field.reg_field_name}：</td>
+				<td width="72%" align="left" bgcolor="#FFFFFF">
+				<input name="extend_field{$field.id}" type="text" class="inputBg" value="{$field.content}"/><!-- {if $field.is_need} --><span style="color:#FF0000"> *</span><!-- {/if} -->
+				</td>
+			<!-- {/if} -->
+    <!--//互亿无线代码-->        
+           
 		<!-- {else} -->
 		<tr>
 			<td width="28%" align="right" bgcolor="#FFFFFF" <!-- {if $field.is_need} -->id="extend_field{$field.id}i"<!--{/if}-->>{$field.reg_field_name}：</td>
@@ -125,6 +147,49 @@
     </form>
      <!--{/if}-->
      <!--#用户信息界面 end-->
+
+<!--//互亿无线代码-->
+     <!-- 绑定手机界面 start-->
+         <!--{if $action eq 'bindmobile'}-->
+         <script>var ztime={$ztime};</script>
+         {insert_scripts files='utils.js'}
+	 {insert_scripts files='global.js'}
+	 {insert_scripts files='transport.js'}
+	 {insert_scripts files='sms.js'}
+        <script type="text/javascript">
+          {foreach from=$lang.profile_js item=item key=key}
+            var {$key} = "{$item}";
+          {/foreach}
+        </script>
+      <h5><span>绑定手机</span></h5>
+      <div class="blank"></div>
+     <form name="formBindmobile" action="user.php" method="post" onSubmit="return bindMobile()" >
+     <input type="hidden" id="sms_code" value="{$sms_code}">
+     <table width="100%" border="0" cellpadding="5" cellspacing="1" bgcolor="#dddddd">
+        <tr>
+          <td width="28%" align="right" bgcolor="#FFFFFF">手机号：</td>
+          <td width="76%" align="left" bgcolor="#FFFFFF"><input id="mobile" name="mobile" type="text" size="25"  class="inputBg" maxlength="12" /></td>
+        </tr>
+        <tr>
+          <td width="28%" align="right" bgcolor="#FFFFFF">图形验证码：</td>
+          <td align="left" bgcolor="#FFFFFF"><input id="smscode" name="smscode" type="text" size="25"  class="inputBg" maxlength="6" /><span style="color:#FF0000"> <img src="captcha.php?139417314" alt="captcha" style="vertical-align: middle;cursor: pointer;" onClick="this.src='captcha.php?'+Math.random()" /></span></td>
+        </tr>
+        <tr>
+          <td width="28%" align="right" bgcolor="#FFFFFF">验证码：</td>
+          <td align="left" bgcolor="#FFFFFF"><input id="verifycode" name="verifycode" type="text" size="25"  class="inputBg" maxlength="6" /><span style="color:#FF0000"> <input type="button" id="zphone" value="获取手机验证码"  onclick="getverifycode2();"></span></td>
+        </tr>
+        <tr>
+          <td colspan="2" align="center" bgcolor="#FFFFFF"><input name="act" type="hidden" value="act_bindmobile" />
+            <input name="submit" type="submit" class="bnt_blue_1" style="border:none;" value="{$lang.confirm_edit}" />
+          </td>
+        </tr>
+      </table>
+    </form>
+     <!--{/if}-->
+     <!--#绑定手机界面 end-->
+<!--//互亿无线代码-->     
+     
+     
      <!-- {if $action eq 'bonus'} 用户的红包列表 start-->
       <script type="text/javascript">
         {foreach from=$lang.profile_js item=item key=key}

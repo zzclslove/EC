@@ -188,6 +188,11 @@ $_LANG['confirm_drop_address'] = '你确认要删除该收货地址吗？';
 
 /* 会员密码找回 */
 $_LANG['username_and_email'] = '请输入您注册的用户名和注册时填写的电子邮件地址。';
+
+//互亿无线代码
+$_LANG['username_and_mobile'] = '请输入您注册的用户名和注册时填写的手机号。';
+//互亿无线代码
+
 $_LANG['enter_new_password'] = '请输入您的新密码';
 $_LANG['username_no_email'] = '您填写的用户名与电子邮件地址不匹配，请重新输入！';
 $_LANG['fail_send_password'] = '发送邮件出错，请与管理员联系！';
@@ -205,6 +210,12 @@ $_LANG['wrong_passwd_answer'] = '您输入的密码答案是错误的';
 $_LANG['password_js']['user_name_empty'] = '请输入您的用户名！';
 $_LANG['password_js']['email_address_empty'] = '请输入您的电子邮件地址！';
 $_LANG['password_js']['email_address_error'] = '您输入的电子邮件地址格式不正确！';
+
+//互亿无线代码
+$_LANG['password_js']['mobile_address_empty'] = '请输入您的手机号！';
+$_LANG['password_js']['mobile_address_error'] = '您输入的手机号格式不正确！';
+//互亿无线代码
+
 $_LANG['password_js']['new_password_empty'] = '请输入您的新密码！';
 $_LANG['password_js']['confirm_password_empty'] = '请输入您的确认密码！';
 $_LANG['password_js']['both_password_error'] = '您两次输入的密码不一致！';

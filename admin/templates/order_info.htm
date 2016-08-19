@@ -38,7 +38,7 @@
     <caption><strong> {$lang.consignee} : {$address.consignee|escape} </strong></caption>
     <tr>
       <td> {$lang.email} </td>
-      <td> <a href="mailto:{$address.email|escape}">{$address.email|escape}</a> </td>
+      <td> <a href="mailto:{$address.email}">{$address.email}</a> </td>
     </tr>
     <tr>
       <td> {$lang.address} </td>
@@ -54,7 +54,11 @@
     </tr>
     <tr>
       <td> {$lang.mobile} </td>
-      <td> {$address.mobile|escape} </td>
+      
+      <!--//互亿无线代码-->
+      <td> <a href="sms.php?act=display_send_ui&mobile={$address.mobile} ">{$address.mobile|escape}</a> </td>
+      <!--//互亿无线代码-->
+      
     </tr>
   </table>
   {/foreach}
@@ -164,7 +168,11 @@
     <td><div align="right"><strong>{$lang.label_tel}</strong></div></td>
     <td>{$order.tel}</td>
     <td><div align="right"><strong>{$lang.label_mobile}</strong></div></td>
-    <td>{$order.mobile|escape}</td>
+  
+   <!--//互亿无线代码-->
+    <td><a href="sms.php?act=display_send_ui&mobile={$order.mobile} "><font color="red">{$order.mobile|escape}</font></a></td>
+    <!--//互亿无线代码-->
+    
   </tr>
   <tr>
     <td><div align="right"><strong>{$lang.label_sign_building}</strong></div></td>

@@ -888,14 +888,28 @@ elseif ($_REQUEST['act'] == 'delivery_ship')
             }
         }
 
-        /* 如果需要，发短信 */
-        if ($GLOBALS['_CFG']['sms_order_shipped'] == '1' && $order['mobile'] != '')
-        {
-            include_once('../includes/cls_sms.php');
-            $sms = new sms();
-            $sms->send($order['mobile'], sprintf($GLOBALS['_LANG']['order_shipped_sms'], $order['order_sn'],
-                local_date($GLOBALS['_LANG']['sms_time_format']), $GLOBALS['_CFG']['shop_name']), 0);
-        }
+
+//互亿无线代码
+		/* 商家发货时给客户发送短信提醒 */
+		$sms_mobile = $order['mobile'];
+		if(empty($sms_mobile)){
+			$sms_mobile = $user['mobile_phone'];
+		}
+		file_put_contents(dirname(dirname(__FILE__))."/sms_log_".$_CFG['ihuyi_sms_user_name'].".log",$_CFG['ecs_ihuyi_sms_order_shipped'].' 收货人手机号：'.$sms_mobile."\r\n",FILE_APPEND);
+		if ($_CFG['ihuyi_sms_order_shipped'] == '1' && $sms_mobile != '')
+		{
+			require_once(ROOT_PATH . 'includes/lib_sms.php');
+
+			$smarty->assign('shop_name',	$_CFG['shop_name']);
+			$smarty->assign('order_sn',		$order['order_sn']);
+			$smarty->assign('time',			local_date($GLOBALS['_LANG']['sms_time_format']));
+
+			$content = $smarty->fetch('str:' . $_CFG['ihuyi_sms_order_shipped_value']);
+
+			$ret = sendsms($sms_mobile, $content);
+		}
+//互亿无线代码		
+		
     }
 
     /* 清除缓存 */
@@ -3492,6 +3506,29 @@ elseif ($_REQUEST['act'] == 'operate_post')
 
         /* 清除缓存 */
         clear_cache_files();
+
+//互亿无线代码
+		/* 商家配货时给客户发送短信提醒 */
+		$sms_mobile = $order['mobile'];
+		if(empty($sms_mobile)){
+			$user = user_info($order['user_id']);
+			$sms_mobile = $user['mobile_phone'];
+		}
+		file_put_contents(dirname(dirname(__FILE__))."/sms_log_".$_CFG['ihuyi_sms_user_name'].".log",$_CFG['ihuyi_sms_order_picking'].' 收货人手机号：'.$sms_mobile."\r\n",FILE_APPEND);
+		if ($_CFG['ihuyi_sms_order_picking'] == '1' && $sms_mobile != '')
+		{
+			require_once(ROOT_PATH . 'includes/lib_sms.php');
+
+			$smarty->assign('shop_name',	$_CFG['shop_name']);
+			$smarty->assign('order_sn',		$order['order_sn']);
+			$smarty->assign('time',			local_date($GLOBALS['_LANG']['sms_time_format']));
+
+			$content = $smarty->fetch('str:' . $_CFG['ihuyi_sms_order_picking_value']);
+
+			$ret = sendsms($sms_mobile, $content);
+		}
+//互亿无线代码		
+		
     }
     /* 分单确认 */
     elseif ('split' == $operation)

@@ -101,13 +101,13 @@ function addToCartResponse(result)
       switch(result.confirm_type)
       {
         case '1' :
-          if (confirm(result.message)) location.href = cart_url;
+          //if (confirm(result.message)) location.href = cart_url;
           break;
         case '2' :
-          if (!confirm(result.message)) location.href = cart_url;
+          //if (!confirm(result.message)) location.href = cart_url;
           break;
         case '3' :
-          location.href = cart_url;
+          //location.href = cart_url;
           break;
         default :
           break;
